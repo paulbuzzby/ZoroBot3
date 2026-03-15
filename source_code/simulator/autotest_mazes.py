@@ -5,6 +5,46 @@ import glob
 import sys
 from pathlib import Path
 
+# Tabla de peligrosidad para cada tipo de movimiento
+MOVEMENT_DANGER = {
+    # Movimientos seguros (0 puntos)
+    'MOVE_NONE': 0,
+    'MOVE_START': 0,
+    'MOVE_HOME': 0,
+    'MOVE_END': 0,
+    'MOVE_FRONT': 0,
+    
+    # Riesgo muy bajo (1-2 puntos)
+    'MOVE_LEFT_90': 1,
+    'MOVE_RIGHT_90': 1,
+    'MOVE_LEFT_180': 2,
+    'MOVE_RIGHT_180': 2,
+    'MOVE_DIAGONAL': 1,
+    
+    # Movimientos de exploración (1 punto)
+    'MOVE_LEFT': 1,
+    'MOVE_RIGHT': 1,
+    'MOVE_BACK': 1,
+    'MOVE_LEFT_INPLACE': 1,
+    'MOVE_RIGHT_INPLACE': 1,
+    'MOVE_BACK_WALL': 1,
+    'MOVE_BACK_STOP': 1,
+    
+    # Riesgo medio (3-5 puntos) - Transiciones diagonales simples
+    'MOVE_LEFT_TO_45': 3,
+    'MOVE_RIGHT_TO_45': 3,
+    'MOVE_LEFT_FROM_45': 3,
+    'MOVE_RIGHT_FROM_45': 3,
+    
+    # Riesgo alto (6-10 puntos) - Giros diagonales complejos
+    'MOVE_LEFT_TO_135': 6,
+    'MOVE_RIGHT_TO_135': 6,
+    'MOVE_LEFT_45_TO_45': 8,
+    'MOVE_RIGHT_45_TO_45': 8,
+    'MOVE_LEFT_FROM_45_180': 6,
+    'MOVE_RIGHT_FROM_45_180': 6,
+}
+
 def parse_total_distance(output):
     """Extrae el valor de Total Distance del output del simulador"""
     if not output:
@@ -14,6 +54,98 @@ def parse_total_distance(output):
     if match:
         return int(match.group(1))
     return None
+
+def parse_movement_sequence(output):
+    """
+    Extrae y parsea la secuencia de movimientos del output del simulador.
+    Retorna una lista de tuplas (movement_name, count).
+    """
+    if not output:
+        return []
+    
+    # Buscar la línea que empieza con MOVE_START y termina con MOVE_HOME
+    pattern = r'^(MOVE_START.*MOVE_HOME)$'
+    match = re.search(pattern, output, re.MULTILINE)
+    
+    if not match:
+        return []
+    
+    sequence_line = match.group(1)
+    movements = []
+    
+    # Dividir por ' > '
+    parts = sequence_line.split(' > ')
+    
+    for part in parts:
+        part = part.strip()
+        
+        # Verificar si tiene el formato NxMOVEMENT_NAME
+        count_match = re.match(r'(\d+)x(.+)', part)
+        if count_match:
+            count = int(count_match.group(1))
+            movement_name = count_match.group(2)
+            movements.append((movement_name, count))
+        else:
+            # Movimiento único
+            movements.append((part, 1))
+    
+    return movements
+
+def calculate_danger_percentage(movements):
+    """
+    Calcula el porcentaje de peligrosidad basado en los movimientos.
+    Aplica multiplicadores exponenciales para giros diagonales concatenados.
+    
+    Args:
+        movements: Lista de tuplas (movement_name, count)
+    
+    Returns:
+        float: Porcentaje de peligrosidad (0-100+)
+    """
+    if not movements:
+        return 0.0
+    
+    total_danger = 0.0
+    consecutive_dangerous_count = 0
+    total_movements = 0
+    
+    for movement_name, count in movements:
+        base_danger = MOVEMENT_DANGER.get(movement_name, 0)
+        
+        # Contar movimientos totales
+        total_movements += count
+        
+        for _ in range(count):
+            # Determinar si es un movimiento peligroso (danger >= 3)
+            if base_danger >= 3:
+                consecutive_dangerous_count += 1
+                
+                # Aplicar multiplicador exponencial basado en concatenación
+                # multiplier = 1 + (consecutive_count * 0.3)^1.2
+                if consecutive_dangerous_count > 1:
+                    multiplier = 1 + pow((consecutive_dangerous_count - 1) * 0.3, 1.2)
+                else:
+                    multiplier = 1.0
+                
+                danger_points = base_danger * multiplier
+            else:
+                # Movimiento seguro o de bajo riesgo
+                danger_points = base_danger
+                consecutive_dangerous_count = 0  # Reset contador
+            
+            total_danger += danger_points
+    
+    # Normalizar el peligro total
+    # Usar un factor de escala ajustado basado en movimientos totales
+    if total_movements > 0:
+        # Factor de escala: asume ~2 puntos promedio por movimiento como "medio"
+        # 50% = ~1 punto promedio por movimiento
+        danger_percentage = (total_danger / total_movements) * 50.0
+    else:
+        danger_percentage = 0.0
+    
+    # Limitar a un rango razonable (0-100), pero permitir valores >100 para casos extremos
+    return min(100.0, danger_percentage)
 
 def run_simulator(maze_file, floodfill_type, simulator_path):
     """Ejecuta el simulador con un tipo de floodfill específico"""
@@ -60,6 +192,8 @@ def process_maze(simulator_path, maze_folder, output_file):
         print(f"Procesando: {os.path.basename(maze_file)}")
         
         distances = []
+        dangers = []
+        
         for floodfill_type in [0, 1, 2, 3]:
             output = run_simulator(maze_file, floodfill_type, simulator_path)
             distance = parse_total_distance(output)
@@ -70,16 +204,26 @@ def process_maze(simulator_path, maze_folder, output_file):
             else:
                 distances.append("ERROR")
                 print(f"  Floodfill {floodfill_type}: ERROR")
+            
+            # Calcular peligrosidad para este tipo de floodfill
+            movements = parse_movement_sequence(output)
+            if movements:
+                danger_pct = calculate_danger_percentage(movements)
+                dangers.append(f"{danger_pct:.1f}")
+                print(f"  Floodfill {floodfill_type} - Peligrosidad: {danger_pct:.1f}%")
+            else:
+                dangers.append("0.0")
+                print(f"  Floodfill {floodfill_type} - Peligrosidad: N/A")
         
-        # Guardar resultado
+        # Guardar resultado con columnas de peligrosidad para cada tipo
         maze_name = os.path.basename(maze_file)
-        result_line = f"{distances[0]}\t{distances[1]}\t{distances[2]}\t{distances[3]}\t\"{maze_name}\""
+        result_line = f"{distances[0]}\t{distances[1]}\t{distances[2]}\t{distances[3]}\t{dangers[0]}\t{dangers[1]}\t{dangers[2]}\t{dangers[3]}\t\"{maze_name}\""
         results.append(result_line)
     
     # Escribir resultados al archivo
     try:
         with open(output_file, 'w', encoding='utf-8') as f:
-            f.write("0\t1\t2\t3\tnombre\n")
+            f.write("0\t1\t2\t3\tp0\tp1\tp2\tp3\tnombre\n")
             for line in results:
                 f.write(line + "\n")
         print(f"\nResultados guardados en: {output_file}")
