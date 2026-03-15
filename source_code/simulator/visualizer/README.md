@@ -14,7 +14,7 @@ Este proyecto permite visualizar lo que hara nuestro robot ZoroBot3 en cualquier
 
 ### Desde Google Colab
 
-1. Sube tu fichero del laberinto y el ejecutable del simulador.
+1. Sube tu archivo de laberinto y el ejecutable del simulador.
 2. copia el codigo de este script en una celda del colab.
 3. Ejecuta el script y llama en otra celda a la función `main()` con los parámetros deseados:
 
@@ -49,39 +49,45 @@ python "array and solve to image.py" --map "maze.map" --sim "./maze_sim" --outpu
 - `--map`: Ruta al archivo de mapa
 - `--sim`: Ruta al ejecutable del simulador
 - `--output`: Nombre del archivo de imagen de salida
-- `--floodfill`: Tipos de floodfill (0, 1, 2, 3)
-- `--explore`: Tipo de exploración
+- `--floodfill`: Tipos de floodfill (0 1 2 ... N)
+- `--explore`: Tipo de exploración (0...N)
 - `--render`: Modo de renderizado (`sprites` o `lines`)
-- `--color`: Modo de color (`parts`, `single`). Si hay más de un floodfill, se colorea automáticamente cada ruta distinta.
+ - `--color`: Modo de color (`parts`, `single`, `danger`). Si hay más de un floodfill, se colorea automáticamente cada ruta distinta.
 
-### Ejemplo visual de modos y recorridos
+## Ejemplo de Variaciones de Comando
 
-#### 1. Sprites Parts (subpartes marcadas con movimientos reales de Zoro)
+### 1. Sprites Danger (movimientos coloreados según peligrosidad del recorrido)
+
+| Un camino | Varios caminos |
+|-----------|---------------|
+| ![sprites_danger_one.png](images/sprites_danger_one.png) | ![sprites_danger_multi.png](images/sprites_danger_multi.png) |
+
+### 2. Sprites Parts (subpartes marcadas con un color distinto por cada movimiento)
 
 | Un camino | Varios caminos |
 |-----------|---------------|
 | ![sprites_parts_one.png](images/sprites_parts_one.png) | ![sprites_parts_multi.png](images/sprites_parts_multi.png) |
 
-#### 2. Sprites Single (movimientos reales de Zoro, un color por recorrido)
+### 3. Sprites Single (movimientos reales de Zoro, un color por recorrido)
 
 | Un camino | Varios caminos |
 |-----------|---------------|
 | ![sprites_single_one.png](images/sprites_single_one.png) | ![sprites_single_multi.png](images/sprites_single_multi.png) |
 
-#### 3. Lines (recorridos marcados solo con giros de 90º, un color por recorrido)
+### 4. Lines (recorridos marcados solo con giros de 90º, un color por recorrido)
 
 | Un camino | Varios caminos |
 |-----------|---------------|
 | ![lines_one.png](images/lines_one.png) | ![lines_multi.png](images/lines_multi.png) |
 
-### Utilidades de Imagen (`image utils.py`)
+## Utilidades de Imagen (`image utils.py`)
 - **bmp_to_sprite_array:** Convierte archivos .bmp monocromáticos a arrays hexadecimales de sprites con preview ASCII.
 - **bmp_to_color_matrix:** Convierte archivos .bmp a matrices RGB para sprites a color.
 - **color_matrix_to_image:** Muestra matrices RGB como imágenes (útil para previsualizar sprites).
 
 **Nota:**
 - Coloca los archivos .bmp de sprites en la carpeta `sprites/` para usar la conversión automática.
-- Los .bmp deben ser de 12x12 o 23x12 píxeles con formato monocromatico para funcionar con los conversores.
+- Los .bmp deben ser de 12x12 o 23x12 píxeles monocromaticos para funcionar en el conversor.
 
 
 ## Requisitos

@@ -18,6 +18,40 @@ if any(arg.startswith('-f') or 'kernel' in arg.lower() for arg in sys.argv):
 # Bits de pared
 NORTH, EAST, SOUTH, WEST = 16, 2, 4, 8
 
+# Tabla de peligrosidad para cada tipo de movimiento
+MOVEMENT_DANGER = {
+    # Movimientos seguros (0 puntos)
+    'MOVE_NONE': 0,
+    'MOVE_START': 0,
+    'MOVE_HOME': 0,
+    'MOVE_END': 0,
+    'MOVE_FRONT': 0,
+    
+    # Riesgo muy bajo (1-2 puntos)
+    'MOVE_LEFT_90': 1,
+    'MOVE_RIGHT_90': 1,
+    'MOVE_LEFT_180': 2,
+    'MOVE_RIGHT_180': 2,
+    'MOVE_DIAGONAL_LEFT': 1,
+    'MOVE_DIAGONAL_RIGHT': 1,
+    
+    # Riesgo medio (3-5 puntos)
+    'MOVE_LEFT_TO_45': 3,
+    'MOVE_RIGHT_TO_45': 3,
+    'MOVE_LEFT_FROM_45': 3,
+    'MOVE_RIGHT_FROM_45': 3,
+    
+    # Riesgo alto (6-10 puntos)
+    'MOVE_LEFT_TO_135': 6,
+    'MOVE_RIGHT_TO_135': 6,
+    'MOVE_LEFT_45_TO_45': 8,
+    'MOVE_RIGHT_45_TO_45': 8,
+    'MOVE_LEFT_FROM_45_180': 6,
+    'MOVE_RIGHT_FROM_45_180': 6,
+    'MOVE_LEFT_DIAGONAL_TO_DIAGONAL': 8,
+    'MOVE_RIGHT_DIAGONAL_TO_DIAGONAL': 8,
+}
+
 # ============================================
 # SISTEMA DE SPRITES PARA ACCIONES
 # ============================================
@@ -642,6 +676,99 @@ def parse_actions_from_output(sim_output):
     
     return actions
 
+def interpolate_color(value, gradient):
+    """
+    Interpola color en un gradiente según un valor normalizado (0-1).
+    
+    Args:
+        value: float entre 0 y 1
+        gradient: lista de tuplas (R, G, B)
+    
+    Returns:
+        tupla (R, G, B)
+    """
+    value = max(0.0, min(1.0, value))  # Clamp entre 0 y 1
+    
+    if value == 0.0:
+        return gradient[0]
+    if value == 1.0:
+        return gradient[-1]
+    
+    # Determinar entre qué dos colores interpolar
+    num_segments = len(gradient) - 1
+    segment_size = 1.0 / num_segments
+    segment_idx = int(value / segment_size)
+    
+    # Prevenir índice fuera de rango
+    if segment_idx >= num_segments:
+        segment_idx = num_segments - 1
+    
+    # Valor local dentro del segmento (0-1)
+    local_value = (value - segment_idx * segment_size) / segment_size
+    
+    # Interpolación lineal RGB
+    c1 = gradient[segment_idx]
+    c2 = gradient[segment_idx + 1]
+    
+    r = int(c1[0] + (c2[0] - c1[0]) * local_value)
+    g = int(c1[1] + (c2[1] - c1[1]) * local_value)
+    b = int(c1[2] + (c2[2] - c1[2]) * local_value)
+    
+    return (r, g, b)
+
+def calculate_danger_colors(actions):
+    """
+    Calcula el color de cada acción basándose en su peligrosidad y concatenación.
+    
+    Args:
+        actions: Lista de nombres de acciones
+    
+    Returns:
+        Lista de colores (tuplas RGB) correspondientes a cada acción
+    """
+    # Gradiente Roronoa (Marimo a Enma)
+    gradient = [
+        (40, 182, 27),    # Verde Marimo (#28B61B)
+        (0, 255, 204),    # Cian Eléctrico (#00FFCC)
+        (0, 127, 255),    # Azul Azure (#007FFF)
+        (79, 0, 255),     # Índigo Eléctrico (#4F00FF)
+        (160, 32, 240),   # Lila Enma (#A020F0)
+        (255, 0, 255),    # Fucsia haki (#FF00FF)
+    ]
+
+    colors = []
+    consecutive_danger_count = 0
+    
+    for action in actions:
+        base_danger = MOVEMENT_DANGER.get(action, 0)
+        
+        # Determinar si es movimiento peligroso (danger >= 3)
+        if base_danger >= 3:
+            consecutive_danger_count += 1
+            
+            # Aplicar multiplicador exponencial basado en concatenación
+            if consecutive_danger_count > 1:
+                multiplier = 1 + pow((consecutive_danger_count - 1) * 0.3, 1.2)
+            else:
+                multiplier = 1.0
+            
+            danger_points = base_danger * multiplier
+        else:
+            # Movimiento seguro o de bajo riesgo
+            danger_points = base_danger
+            consecutive_danger_count = 0  # Reset contador
+        
+        # Normalizar danger_points a rango 0-1
+        # Máximo esperado: ~10 puntos base * ~2.5 multiplicador = 25 puntos
+        # Usar 30 como techo para saturar en rosa solo en casos extremos
+        normalized_danger = min(danger_points / 30.0, 1.0)
+        
+        # Interpolar color
+        color_rgb = interpolate_color(normalized_danger, gradient)
+        colors.append(color_rgb)
+    
+    return colors
+
 def get_action_color(action_name):
     """
     Devuelve un color único para cada tipo de curva.
@@ -1082,7 +1209,7 @@ def main(map_path="Portuguese Micromouse Contest 2025.map",
          floodfill_types=None,
          explore_types=None,
          render_mode="sprites",  # "sprites" o "lines"
-         color_mode="parts"):  # "parts" o "single"
+         color_mode="parts"):  # "parts", "single", o "danger"
     """
     Genera visualización del laberinto con paths de floodfill.
     
@@ -1096,6 +1223,7 @@ def main(map_path="Portuguese Micromouse Contest 2025.map",
         color_mode: 
             - "parts": Una ruta, cada segmento con su color
             - "single": Una ruta, todos los segmentos del mismo color
+            - "danger": Color por peligrosidad
         El modo 'grouped' se elimina; se gestiona automáticamente según floodfill_types
     """
     
@@ -1187,6 +1315,16 @@ def main(map_path="Portuguese Micromouse Contest 2025.map",
             actions_with_colors.append((action_positions, single_color))
             paths_with_colors.append((path_cells, single_color))
         
+        elif color_mode == "danger":
+            # Color por peligrosidad (solo para sprites)
+            action_names_only = [name for name, _, _ in action_positions]
+            danger_colors = calculate_danger_colors(action_names_only)
+            
+            # Asignar color individual a cada acción
+            for i, (action_name, cell_positions, direction) in enumerate(action_positions):
+                color_rgb = danger_colors[i]
+                actions_with_colors.append(([(action_name, cell_positions, direction)], color_rgb))
+        
         # El modo 'grouped' se elimina; se gestiona automáticamente según floodfill_types
     
     # Dibujar según el modo de render
@@ -1232,8 +1370,8 @@ if __name__ == "__main__":
         # Modos de visualización
         parser.add_argument("--render", type=str, choices=["sprites", "lines"], default="sprites",
                            help="Modo de renderizado: 'sprites' (bloques) o 'lines' (unir centros)")
-        parser.add_argument("--color", type=str, choices=["parts", "single"], default="parts",
-                   help="Modo de color: 'parts' (cada segmento su color), 'single' (una ruta un color). Si hay más de un floodfill, se colorea automáticamente cada ruta distinta.")
+        parser.add_argument("--color", type=str, choices=["parts", "single", "danger"], default="parts",
+                   help="Modo de color: 'parts' (cada segmento su color), 'single' (una ruta un color), 'danger' (por peligrosidad, gradiente azul-rosa). Si hay más de un floodfill, se colorea automáticamente cada ruta distinta.")
         
         args = parser.parse_args()
         
@@ -1261,7 +1399,7 @@ main(
     floodfill_types=[0, 1, 2, 3],  # Los 4 tipos de floodfill
     explore_types=[0],               # Explore tipo 0
     render_mode="sprites",           # "sprites" o "lines"
-    color_mode="parts"             # "parts" o "single"
+    color_mode="parts"             # "parts", "single", o "danger"
 )
 
 # Mostrar la imagen generada
