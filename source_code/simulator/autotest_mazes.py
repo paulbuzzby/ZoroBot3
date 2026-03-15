@@ -185,7 +185,7 @@ def process_maze(simulator_path, maze_folder, output_file):
         return
     
     results = []
-    
+
     print(f"Procesando {len(maze_files)} laberintos...")
     
     for maze_file in maze_files:
@@ -193,14 +193,15 @@ def process_maze(simulator_path, maze_folder, output_file):
         
         distances = []
         dangers = []
-        
+        cell_counts = []
+        times = []
         for floodfill_type in [0, 1, 2, 3]:
             output = run_simulator(maze_file, floodfill_type, simulator_path)
             distance = parse_total_distance(output)
             
             if distance is not None:
                 distances.append(str(distance))
-                print(f"  Floodfill {floodfill_type}: {distance}")
+                print(f"  Floodfill {floodfill_type} - Distancia: {distance}")
             else:
                 distances.append("ERROR")
                 print(f"  Floodfill {floodfill_type}: ERROR")
@@ -214,16 +215,22 @@ def process_maze(simulator_path, maze_folder, output_file):
             else:
                 dangers.append("0.0")
                 print(f"  Floodfill {floodfill_type} - Peligrosidad: N/A")
-        
-        # Guardar resultado con columnas de peligrosidad para cada tipo
+            # Extraer número de casillas óptimas
+            cell_count = parse_optimal_cells(output)
+            cell_counts.append(str(cell_count))
+            print(f"  Floodfill {floodfill_type} - Casillas: {cell_count}")
+            # Extraer tiempo óptimo
+            optimal_time = parse_optimal_time(output)
+            times.append(str(optimal_time))
+            print(f"  Floodfill {floodfill_type} - Tiempo: {optimal_time}")
         maze_name = os.path.basename(maze_file)
-        result_line = f"{distances[0]}\t{distances[1]}\t{distances[2]}\t{distances[3]}\t{dangers[0]}\t{dangers[1]}\t{dangers[2]}\t{dangers[3]}\t\"{maze_name}\""
+        result_line = f"{distances[0]}\t{distances[1]}\t{distances[2]}\t{distances[3]}\t{dangers[0]}\t{dangers[1]}\t{dangers[2]}\t{dangers[3]}\t{cell_counts[0]}\t{cell_counts[1]}\t{cell_counts[2]}\t{cell_counts[3]}\t{times[0]}\t{times[1]}\t{times[2]}\t{times[3]}\t\"{maze_name}\""
         results.append(result_line)
     
     # Escribir resultados al archivo
     try:
         with open(output_file, 'w', encoding='utf-8') as f:
-            f.write("0\t1\t2\t3\tp0\tp1\tp2\tp3\tnombre\n")
+            f.write("0\t1\t2\t3\tp0\tp1\tp2\tp3\tc0\tc1\tc2\tc3\tt0\tt1\tt2\tt3\tnombre\n")
             for line in results:
                 f.write(line + "\n")
         print(f"\nResultados guardados en: {output_file}")
@@ -231,6 +238,49 @@ def process_maze(simulator_path, maze_folder, output_file):
         print(f"Error escribiendo archivo: {e}")
     
     print(f"Total laberintos procesados: {len(results)}")
+
+def parse_optimal_cells(output):
+    """
+    Extrae el número de casillas óptimas recorridas (cuenta de bloques '  ███  ' en el output).
+    """
+    if not output:
+        return 0
+    # Buscar todas las ocurrencias de '  ███  '
+    return len(re.findall(r'  ███  ', output))
+
+def parse_optimal_time(output):
+    """
+    Extrae el tiempo óptimo de la casilla inferior izquierda de la matriz de tiempos floodfill.
+    """
+    if not output:
+        return 0
+    # Buscar el bloque de la matriz de tiempos floodfill
+    matrix_started = False
+    matrix_lines = []
+    for line in output.splitlines():
+        if '=== TIEMPOS (FLOODFILL) ===' in line:
+            matrix_started = True
+            continue
+        if matrix_started:
+            # Fin del bloque si aparece otra sección
+            if line.strip().startswith('==='):
+                break
+            # Solo líneas de matriz (empiezan por '║')
+            if line.strip().startswith('║'):
+                matrix_lines.append(line)
+    if not matrix_lines:
+        return 0
+    # Tomar la última línea de la matriz
+    last_line = matrix_lines[-1]
+    # Extraer el primer valor numérico de la última línea (esquina inferior izquierda)
+    # Los valores pueden ser float
+    match = re.search(r'║\s*([\d\.]+)', last_line)
+    if match:
+        try:
+            return float(match.group(1))
+        except ValueError:
+            return 0
+    return 0
 
 def main():
     # Verificar argumentos
