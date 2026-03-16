@@ -968,7 +968,7 @@ def call_simulator(sim_path, map_path, floodfill_type=0, explore_type=0):
         f'-floodfill-type={floodfill_type}',
         f'-explore-type={explore_type}',
         map_path
-    ], capture_output=True, text=True)
+    ], capture_output=True, text=True, encoding="utf-8")
     return result.stdout
 
 def parse_times_map(sim_output, columns=16):
@@ -1200,7 +1200,8 @@ def draw_maze_from_array(cell_array,
     dirname = os.path.dirname(output_path)
     if dirname:
         os.makedirs(dirname, exist_ok=True)
-    img.save(output_path)
+    img_grande = img.resize((img.width*4, img.height*4), Image.NEAREST)
+    img_grande.save(output_path)
     print(f"Laberinto reconstruido guardado en: {output_path}")
 
 def main(map_path="Portuguese Micromouse Contest 2025.map",
