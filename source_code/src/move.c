@@ -53,7 +53,7 @@ static struct kpi_params kpi_explore[] = {
     },
     [KPI_FRONT_DISTANCE_SENSORS] = {
         .kp = 0.05,
-        .ki = 0.00,
+        .ki = 0.0002,
         .kd = 0.25,
     },
     [KPI_FRONT_DIAGONAL_SENSORS] = {
@@ -86,7 +86,7 @@ static struct kpi_params kpi_run[] = {
     },
     [KPI_FRONT_DISTANCE_SENSORS] = {
         .kp = 0.05,
-        .ki = 0.00,
+        .ki = 0.0002,
         .kd = 0.25,
     },
     [KPI_FRONT_DIAGONAL_SENSORS] = {
