@@ -60,25 +60,25 @@ python "array and solve to image.py" --map "maze.map" --sim "./maze_sim" --outpu
 
 | Un camino | Varios caminos |
 |-----------|---------------|
-| ![sprites_danger_one.png](images/sprites_danger_one.png) | ![sprites_danger_multi.png](images/sprites_danger_multi.png) |
+| ![sprites_danger_one.png](../../../images/simulator/sprites_danger_one.png) | ![sprites_danger_multi.png](../../../images/simulator/sprites_danger_multi.png) |
 
 ### 2. Sprites Parts (subpartes marcadas con un color distinto por cada movimiento)
 
 | Un camino | Varios caminos |
 |-----------|---------------|
-| ![sprites_parts_one.png](images/sprites_parts_one.png) | ![sprites_parts_multi.png](images/sprites_parts_multi.png) |
+| ![sprites_parts_one.png](../../../images/simulator/sprites_parts_one.png) | ![sprites_parts_multi.png](../../../images/simulator/sprites_parts_multi.png) |
 
 ### 3. Sprites Single (movimientos reales de Zoro, un color por recorrido)
 
 | Un camino | Varios caminos |
 |-----------|---------------|
-| ![sprites_single_one.png](images/sprites_single_one.png) | ![sprites_single_multi.png](images/sprites_single_multi.png) |
+| ![sprites_single_one.png](../../../images/simulator/sprites_single_one.png) | ![sprites_single_multi.png](../../../images/simulator/sprites_single_multi.png) |
 
 ### 4. Lines (recorridos marcados solo con giros de 90º, un color por recorrido)
 
 | Un camino | Varios caminos |
 |-----------|---------------|
-| ![lines_one.png](images/lines_one.png) | ![lines_multi.png](images/lines_multi.png) |
+| ![lines_one.png](../../../images/simulator/lines_one.png) | ![lines_multi.png](../../../images/simulator/lines_multi.png) |
 
 ## Utilidades de Imagen (`image utils.py`)
 - **bmp_to_sprite_array:** Convierte archivos .bmp monocromáticos a arrays hexadecimales de sprites con preview ASCII.
