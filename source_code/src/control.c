@@ -415,25 +415,7 @@ void control_loop(void) {
 
   if (front_sensors_distance_correction_enabled && ideal_front_distance > 0 && get_front_wall_distance() < CELL_DIMENSION) {
     front_sensors_distance_error = get_front_wall_distance() - ideal_front_distance;
-    // if (abs(front_sensors_distance_error) <= 2) {
-    //   front_sensors_distance_error = 0;
-    // }
-    // printf("front distance: %4d front error: %.4f\n", get_front_wall_distance(), front_sensors_distance_error);
     sum_front_sensors_distance_error += front_sensors_distance_error;
-
-    static char *labels[] = {
-        "front_error",
-        "pwm_left",
-        "pwm_right",
-    };
-    macroarray_store(
-        1,
-        0b0,
-        labels,
-        3,
-        (int16_t)front_sensors_distance_error,
-        (int16_t)pwm_left,
-        (int16_t)pwm_right);
   } else {
     front_sensors_distance_error = 0;
     sum_front_sensors_distance_error = 0;
@@ -485,6 +467,43 @@ void control_loop(void) {
   pwm_left = voltage_to_motor_pwm(voltage_left);
   pwm_right = voltage_to_motor_pwm(voltage_right);
   set_motors_pwm(pwm_left, pwm_right);
+
+  if (is_race_mode()) {
+    static char *labels[] = {
+        "target_linear_speed",
+        "ideal_linear_speed",
+        "measured_linear_speed",
+        // "measured_left_speed",
+        // "measured_right_speed",
+        "ideal_angular_speed",
+        "measured_angular_speed",
+        "raw_angular_speed",
+        "pwm_left",
+        "pwm_right",
+        // "encoder_avg_millimeters",
+        // "side_sensors_error",
+        // "angular_voltage",
+        "battery_voltage"};
+    macroarray_store(
+        1,
+        0b000111001,
+        labels,
+        9,
+        (int16_t)target_linear_speed,
+        (int16_t)ideal_linear_speed,
+        (int16_t)(get_measured_linear_speed()),
+        // (int16_t)(get_encoder_left_speed()),
+        // (int16_t)(get_encoder_right_speed()),
+        (int16_t)(ideal_angular_speed * 100),
+        (int16_t)(get_measured_angular_speed() * 100),
+        (int16_t)(lsm6dsr_get_gyro_z_raw() * 100),
+        (int16_t)pwm_left,
+        (int16_t)pwm_right,
+        // (int16_t)get_encoder_avg_millimeters(),
+        // (int16_t)(side_sensors_error * 100),
+        // (int16_t)(angular_voltage * 100),
+        (int16_t)(get_battery_voltage() * 100));
+  }
 
   if (ideal_linear_speed != 0 || ideal_angular_speed != 0) {
     // static char *labels[] = {

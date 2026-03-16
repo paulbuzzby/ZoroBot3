@@ -84,5 +84,6 @@ void floodfill_load_maze(void);
 void floodfill_start_explore(void);
 void floodfill_start_run(void);
 void floodfill_loop(void);
+bool is_race_mode(void);
 
 #endif

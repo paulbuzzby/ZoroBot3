@@ -1891,3 +1891,7 @@ void floodfill_loop(void) {
     loop_explore();
   }
 }
+
+bool is_race_mode(void) {
+  return race_mode;
+}
