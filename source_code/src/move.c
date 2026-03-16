@@ -135,8 +135,8 @@ static struct inplace_params turns_inplace[] = {
 
 static struct turn_params turns_explore[] = {
     [MOVE_LEFT] = {
-        .start = 10.1633,
-        .end = 10.1571,
+        .start = 13.1633,
+        .end = 13.1571,
         .linear_speed = 800,
         .max_angular_speed = 14.5455,
         .transition = 63.3480,
@@ -144,8 +144,8 @@ static struct turn_params turns_explore[] = {
         .sign = -1,
     },
     [MOVE_RIGHT] = {
-        .start = 10.1633,
-        .end = 10.1571,
+        .start = 13.1633,
+        .end = 13.1571,
         .linear_speed = 800,
         .max_angular_speed = 14.5455,
         .transition = 63.3480,
