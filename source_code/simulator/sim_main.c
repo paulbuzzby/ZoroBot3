@@ -119,7 +119,8 @@ int main(int argc, char *argv[]) {
 
   printf("=== ZoroBot3 Maze Simulator (Standalone) ===\n");
   printf("Laberinto: %s (16x16)\n", maze_file);
-  printf("Floodfill type: %d\n\n", MMSIM_FLOODFILL_TYPE);
+  printf("Floodfill type: %d\t", MMSIM_FLOODFILL_TYPE);
+  printf("Explore type: %d\n\n", MMSIM_EXPLORE_TYPE);
 
   // Ejecutar exploración (igual que mmsim.c)
   sim_api_reset_position();

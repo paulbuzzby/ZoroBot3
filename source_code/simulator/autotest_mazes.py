@@ -147,9 +147,13 @@ def calculate_danger_percentage(movements):
     # Limitar a un rango razonable (0-100), pero permitir valores >100 para casos extremos
     return min(100.0, danger_percentage)
 
-def run_simulator(maze_file, floodfill_type, simulator_path):
-    """Ejecuta el simulador con un tipo de floodfill específico"""
-    cmd = [simulator_path, f'-floodfill-type={floodfill_type}', maze_file]
+def run_simulator(maze_file, floodfill_type, simulator_path, explore_type):
+    """Ejecuta el simulador con un tipo de floodfill y explore específicos"""
+    cmd = [simulator_path, f'-floodfill-type={floodfill_type}', f'-explore-type={explore_type}', maze_file]
+    
+    # DEBUG: Imprimir comando para verificar
+    # print(f"    CMD: {' '.join(cmd)}")
+    
     try:
         # FIX: encoding='utf-8' con errors='ignore' y verificar None
         result = subprocess.run(
@@ -165,14 +169,14 @@ def run_simulator(maze_file, floodfill_type, simulator_path):
         stderr = result.stderr if result.stderr is not None else ""
         return stdout + stderr
     except subprocess.TimeoutExpired:
-        print(f"  Timeout floodfill {floodfill_type}")
+        print(f"  Timeout floodfill {floodfill_type} explore {explore_type}")
         return ""
     except Exception as e:
-        print(f"  Error floodfill {floodfill_type}: {str(e)[:50]}")
+        print(f"  Error floodfill {floodfill_type} explore {explore_type}: {str(e)[:50]}")
         return ""
 
-def process_maze(simulator_path, maze_folder, output_file):
-    """Procesa todos los laberintos de la carpeta"""
+def process_maze(simulator_path, maze_folder, output_file, explore_type):
+    """Procesa todos los laberintos de la carpeta con un explore_type específico"""
     # Buscar archivos .map y .txt
     maze_files = []
     for ext in ['*.map', '*.txt']:
@@ -186,7 +190,7 @@ def process_maze(simulator_path, maze_folder, output_file):
     
     results = []
 
-    print(f"Procesando {len(maze_files)} laberintos...")
+    print(f"Procesando {len(maze_files)} laberintos con explore_type={explore_type}...")
     
     for maze_file in maze_files:
         print(f"Procesando: {os.path.basename(maze_file)}")
@@ -196,7 +200,7 @@ def process_maze(simulator_path, maze_folder, output_file):
         cell_counts = []
         times = []
         for floodfill_type in [0, 1, 2, 3]:
-            output = run_simulator(maze_file, floodfill_type, simulator_path)
+            output = run_simulator(maze_file, floodfill_type, simulator_path, explore_type)
             distance = parse_total_distance(output)
             
             if distance is not None:
@@ -291,7 +295,6 @@ def main():
     
     maze_folder = sys.argv[1]
     SIMULATOR_PATH = r".\maze_sim.exe"
-    OUTPUT_FILE = "resultados_floodfill.txt"
     
     # Verificar que la carpeta existe
     if not os.path.exists(maze_folder):
@@ -304,7 +307,14 @@ def main():
         print("Asegúrate de que maze_sim.exe está en la carpeta simulator/")
         sys.exit(1)
     
-    process_maze(SIMULATOR_PATH, maze_folder, OUTPUT_FILE)
+    # Procesar para cada tipo de exploración
+    for explore_type in [0, 1, 2]:
+        print(f"\n{'='*60}")
+        print(f"PROCESANDO EXPLORE_TYPE = {explore_type}")
+        print(f"{'='*60}\n")
+        
+        output_file = f"resultados_floodfill_explore_{explore_type}.txt"
+        process_maze(SIMULATOR_PATH, maze_folder, output_file, explore_type)
 
 if __name__ == "__main__":
     main()
