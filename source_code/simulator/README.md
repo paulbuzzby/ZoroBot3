@@ -236,7 +236,7 @@ Ambos usan el mismo flag `MMSIM_ENABLED` y las mismas funciones `API_*` definida
 
 ## Uso del script de Python para pruebas automáticas
 
-El script `autotest_mazes.py` permite ejecutar el simulador sobre una carpeta de laberintos (.map o .txt) y guardar los resultados de distancia para cada tipo de floodfill.
+El script `autotest_mazes.py` permite ejecutar el simulador sobre una carpeta de laberintos (.map o .txt) y guardar los resultados de distancia y peligrosidad para cada tipo de floodfill.
 
 ### Ejemplo de uso:
 
@@ -247,6 +247,19 @@ python simulator/autotest_mazes.py <mazes_folder>
 - `<mazes_folder>`: Ruta a la carpeta que contiene los archivos .map o .txt
 
 El script ejecuta el simulador para cada laberinto y cada tipo de floodfill (0, 1, 2, 3), y guarda los resultados en `resultados_floodfill.txt`.
+
+Ahora el archivo de resultados incluye la peligrosidad de cada recorrido:
+
+```
+0	1	2	3	p0	p1	p2	p3	nombre
+```
+
+Donde:
+- `0, 1, 2, 3`: Distancia total para cada tipo de floodfill
+- `p0, p1, p2, p3`: Peligrosidad (%) del recorrido para cada tipo de floodfill
+- `nombre`: Nombre del laberinto
+
+La peligrosidad es un porcentaje que estima el riesgo del recorrido según los movimientos realizados (giros, diagonales, concatenaciones peligrosas, etc). Un valor alto indica un recorrido más complejo o arriesgado.
 
 ### Requisitos:
 
