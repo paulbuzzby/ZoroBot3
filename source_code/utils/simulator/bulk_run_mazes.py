@@ -227,7 +227,7 @@ def process_maze(simulator_path, maze_folder, output_file, explore_type):
             optimal_time = parse_optimal_time(output)
             times.append(str(optimal_time))
             print(f"  Floodfill {floodfill_type} - Tiempo: {optimal_time}")
-        maze_name = os.path.basename(maze_file)
+        maze_name = Path(maze_file).stem
         result_line = f"{distances[0]}\t{distances[1]}\t{distances[2]}\t{distances[3]}\t{dangers[0]}\t{dangers[1]}\t{dangers[2]}\t{dangers[3]}\t{cell_counts[0]}\t{cell_counts[1]}\t{cell_counts[2]}\t{cell_counts[3]}\t{times[0]}\t{times[1]}\t{times[2]}\t{times[3]}\t\"{maze_name}\""
         results.append(result_line)
     
