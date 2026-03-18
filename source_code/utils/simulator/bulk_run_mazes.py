@@ -313,7 +313,7 @@ def main():
         print(f"PROCESANDO EXPLORE_TYPE = {explore_type}")
         print(f"{'='*60}\n")
         
-        output_file = f"resultados_floodfill_explore_{explore_type}.txt"
+        output_file = f"bulk_run_results_explore_{explore_type}.txt"
         process_maze(SIMULATOR_PATH, maze_folder, output_file, explore_type)
 
 if __name__ == "__main__":

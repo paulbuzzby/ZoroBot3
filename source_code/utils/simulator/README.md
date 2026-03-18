@@ -1,4 +1,4 @@
-# ZoroBot3 Maze Simulator (Standalone)
+# ZoroBot3: Maze Simulator (Standalone)
 
 Este simulador permite ejecutar el algoritmo de mapeo y resolución de ZoroBot3 en PC, usando la lógica del robot real.
 
@@ -37,16 +37,29 @@ El flag `-DMMSIM_ENABLED` activa los bloques condicionales en el código origina
 
 ## Compilación
 
+### Windows
 ```bash
-cd simulator
-make -f Makefile.simulator
+cd utils\simulator
+make -f Makefile.windows
+```
+
+### Linux
+```bash
+cd utils/simulator
+make -f Makefile.linux
 ```
 
 ## Uso
 
+### Windows
 ```bash
 # Ejecutar con fichero .map
-simulator\maze_sim.exe -floodfill-type=0 -explore-type=0 maze.map
+maze_sim.exe -floodfill-type=0 -explore-type=0 mazes\maze.map
+```
+### Linux
+```bash
+# Ejecutar con fichero .map
+maze_sim -floodfill-type=0 -explore-type=0 mazes/maze.map
 ```
 
 ## Argumentos
@@ -118,8 +131,8 @@ Los ficheros .map se guardan automáticamente desde MMS.
 
 ```
 === ZoroBot3 Maze Simulator (Standalone) ===
-Laberinto: ../others/Portuguese Micromouse Contest 2025.map (16x16)
-Floodfill type: 0
+Laberinto: ./mazes/Portuguese Micromouse Contest 2025.map (16x16)
+FloodFill type: 0
 
 Interesting cell: 1 - 2
 Interesting cell: 2 - 3
@@ -230,38 +243,38 @@ Score: 517.2
 
 ## Diferencia con MMS
 
-El simulador MMS (`lib/mmsim_api/mmsim_api.c`) se comunica con un GUI externo mediante stdout/stdin. Este simulador standalone (`simulator/sim_api.c`) lee las paredes de un array interno, permitiendo ejecutar el algoritmo sin necesidad de GUI y sin los retrasos en las comunicaciones, por lo que se pueden obtener los stats de manera rapida y eficaz.
+El simulador MMS (`lib/mmsim_api/mmsim_api.c`) se comunica con un GUI externo mediante stdout/stdin. Este simulador standalone (`utils/simulator/sim_api.c`) lee las paredes de un array interno, permitiendo ejecutar el algoritmo sin necesidad de GUI y sin los retrasos en las comunicaciones, por lo que se pueden obtener los stats de manera rapida y eficaz.
 
-Ambos usan el mismo flag `MMSIM_ENABLED` y las mismas funciones `API_*` definidas en zoro.
+Ambos usan el mismo flag `MMSIM_ENABLED` y las mismas funciones `API_*` definidas en el código de ZoroBot3.
 
 ## Uso del script de Python para pruebas automáticas
 
-El script `autotest_mazes.py` permite ejecutar el simulador sobre una carpeta de laberintos (.map o .txt) y guardar los resultados de distancia y peligrosidad para cada tipo de floodfill.
+El script `bulk_run_mazes.py` permite ejecutar el simulador sobre una carpeta de laberintos (.map o .txt) y guardar los resultados de distancia y peligrosidad para cada tipo de FloodFill y Explore.
 
 ### Ejemplo de uso:
 
 ```bash
-python simulator/autotest_mazes.py <mazes_folder>
+python utils/simulator/bulk_run_mazes.py <mazes_folder>
 ```
 
 - `<mazes_folder>`: Ruta a la carpeta que contiene los archivos .map o .txt
 
-El script ejecuta el simulador para cada laberinto y cada tipo de floodfill (0, 1, 2, 3), y guarda los resultados en `resultados_floodfill.txt`.
+El script ejecuta el simulador para cada laberinto y cada tipo de FloodFill (0, 1, 2, 3) y Explore (0, 1, 2), y guarda los resultados en `bulk_run_results.txt`.
 
 Ahora el archivo de resultados incluye la peligrosidad de cada recorrido:
 
 ```
-0	1	2	3	p0	p1	p2	p3	nombre
+0	1	2	3	p0	p1	p2	p3	maze
 ```
 
 Donde:
-- `0, 1, 2, 3`: Distancia total para cada tipo de floodfill
-- `p0, p1, p2, p3`: Peligrosidad (%) del recorrido para cada tipo de floodfill
-- `nombre`: Nombre del laberinto
+- `0, 1, 2, 3`: Distancia total para cada tipo de FloodFill
+- `p0, p1, p2, p3`: Peligrosidad (%) del recorrido para cada tipo de FloodFill
+- `maze`: Nombre del laberinto
 
 La peligrosidad es un porcentaje que estima el riesgo del recorrido según los movimientos realizados (giros, diagonales, concatenaciones peligrosas, etc). Un valor alto indica un recorrido más complejo o arriesgado.
 
 ### Requisitos:
 
-- Tener `maze_sim.exe` compilado en la carpeta `simulator/`
+- Tener `maze_sim.exe` (Windows) o `maze_sim` (Linux) compilado en la carpeta `utils/simulator/`
 - Python 3 instalado

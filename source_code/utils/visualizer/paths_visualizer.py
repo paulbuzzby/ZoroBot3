@@ -1206,7 +1206,7 @@ def draw_maze_from_array(cell_array,
 
 def main(map_path="Portuguese Micromouse Contest 2025.map",
          sim_path="./maze_sim",
-         output_path="maze_solved.bmp",
+         output_path="maze_paths.bmp",
          floodfill_types=None,
          explore_types=None,
          render_mode="sprites",  # "sprites" o "lines"
@@ -1359,7 +1359,7 @@ if __name__ == "__main__":
                            help="Ruta del archivo .map")
         parser.add_argument("--sim", type=str, default="./maze_sim",
                            help="Ruta al ejecutable del simulador")
-        parser.add_argument("--output", type=str, default="maze_solved.bmp", 
+        parser.add_argument("--output", type=str, default="maze_paths.bmp", 
                            help="Ruta de salida de la imagen")
         
         # Algoritmos
@@ -1396,7 +1396,7 @@ crear celda debajo y poner:
 main(
     map_path="Portuguese Micromouse Contest 2025.map",
     sim_path="./maze_sim",
-    output_path="maze_solved.bmp",
+    output_path="maze_paths.bmp",
     floodfill_types=[0, 1, 2, 3],  # Los 4 tipos de floodfill
     explore_types=[0],               # Explore tipo 0
     render_mode="sprites",           # "sprites" o "lines"
@@ -1407,7 +1407,7 @@ main(
 from PIL import Image
 from IPython.display import display
 
-img = Image.open("maze_solved.bmp")
+img = Image.open("maze_paths.bmp")
 display(img)
 
 # Versión escalada x3
@@ -1419,6 +1419,6 @@ display(img_grande)
 
 Por terminal:
 
-python "array and solve to image.py" --map "Portuguese Micromouse Contest 2025.map" --sim "./maze_sim" --output "maze_solved_terminal.bmp" --floodfill 0 1 2 3 --explore 2 --render sprites --color parts
+python "array and solve to image.py" --map "Portuguese Micromouse Contest 2025.map" --sim "./maze_sim" --output "maze_paths_terminal.bmp" --floodfill 0 1 2 3 --explore 2 --render sprites --color parts
 
 '''
