@@ -207,11 +207,11 @@ int API_moveForward(void) {
     }
     
     // Actualizar stats (cada celda = 2 unidades como en MMS)
-    total_distance += 2;
+    total_distance++;
     float eff = get_effective_distance(2);
     total_effective_distance += eff;
     if (run_started) {
-        current_run_distance += 2;
+        current_run_distance++;
         current_run_effective_distance += eff;
     }
     
