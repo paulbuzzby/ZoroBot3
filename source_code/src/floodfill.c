@@ -1673,6 +1673,16 @@ static void loop_explore(void) {
         set_target(0);
         break;
       case EXPLORE_COMPLETE:
+#ifdef MMSIM_ENABLED
+        if (interesting_cell == 0 && current_position == 0) {
+          set_race_started(false);
+          mmsim_finish_explore();
+          return;
+        } else {
+          set_target(interesting_cell);
+        }
+
+#else
         if (interesting_cell == 0 && !is_race_auto_run()) {
           if (get_current_stored_walls().front) {
             move(MOVE_HOME);
@@ -1680,13 +1690,12 @@ static void loop_explore(void) {
             move(MOVE_END);
           }
           set_race_started(false);
-#ifdef MMSIM_ENABLED
-          mmsim_finish_explore();
-#endif
           return;
         } else {
           set_target(interesting_cell);
         }
+#endif
+
         break;
     }
 
