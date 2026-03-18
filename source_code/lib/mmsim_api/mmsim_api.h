@@ -37,5 +37,6 @@ int API_wasReset(void);
 void API_ackReset(void);
 
 void API_log(char *text);
+void API_setTime(float time);
 
 #endif

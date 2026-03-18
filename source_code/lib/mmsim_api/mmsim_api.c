@@ -122,3 +122,8 @@ void API_log(char *text) {
   fprintf(stderr, "%s\n", text);
   fflush(stderr);
 }
+
+void API_setTime(float time) {
+  printf("totalTime %.3f\n", time);
+  fflush(stdout);
+}

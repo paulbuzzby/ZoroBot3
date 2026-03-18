@@ -33,6 +33,7 @@ static int current_dir = DIR_NORTH;  // 0=N, 1=E, 2=S, 3=W
 
 // Stats de exploración (igual que MMS)
 static int total_distance = 0;
+static float total_time = 0.0f;
 static int current_run_distance = 0;
 static float total_effective_distance = 0.0f;
 static float current_run_effective_distance = 0.0f;
@@ -135,6 +136,9 @@ void sim_api_print_stats(void) {
     snprintf(buf, sizeof(buf), "Best Run Effective Distance: %.1f", best_run_effective_distance);
     API_log(buf);
     snprintf(buf, sizeof(buf), "Best Run Turns: %d", best_run_turns);
+    API_log(buf);
+    
+    snprintf(buf, sizeof(buf), "Total Time: %.3f", total_time);
     API_log(buf);
     
     snprintf(buf, sizeof(buf), "Score: %.1f", score);
@@ -328,6 +332,10 @@ void API_ackReset(void) {
 void API_log(char *text) {
     fprintf(stderr, "%s\n", text);
     fflush(stderr);
+}
+
+void API_setTime(float time){
+    total_time = time;
 }
 
 // Imprime el laberinto con tiempos (valores de floodfill)

@@ -55,6 +55,16 @@ def parse_total_distance(output):
         return int(match.group(1))
     return None
 
+def parse_total_time(output):
+    """Extrae el valor de Total Time del output del simulador"""
+    if not output:
+        return None
+    pattern = r'Total Time:\s*(\d+\.\d+)'
+    match = re.search(pattern, output)
+    if match:
+        return float(match.group(1))
+    return None
+
 def parse_movement_sequence(output):
     """
     Extrae y parsea la secuencia de movimientos del output del simulador.
@@ -209,6 +219,15 @@ def process_maze(simulator_path, maze_folder, output_file, explore_type):
             else:
                 distances.append("ERROR")
                 print(f"  Floodfill {floodfill_type}: ERROR")
+
+            time = parse_total_time(output)
+            
+            if time is not None:
+                times.append(str(time))
+                print(f"  Floodfill {floodfill_type} - Tiempo: {time}")
+            else:
+                times.append("ERROR")
+                print(f"  Floodfill {floodfill_type}: ERROR")
             
             # Calcular peligrosidad para este tipo de floodfill
             movements = parse_movement_sequence(output)
@@ -223,10 +242,6 @@ def process_maze(simulator_path, maze_folder, output_file, explore_type):
             cell_count = parse_optimal_cells(output)
             cell_counts.append(str(cell_count))
             print(f"  Floodfill {floodfill_type} - Casillas: {cell_count}")
-            # Extraer tiempo óptimo
-            optimal_time = parse_optimal_time(output)
-            times.append(str(optimal_time))
-            print(f"  Floodfill {floodfill_type} - Tiempo: {optimal_time}")
         maze_name = Path(maze_file).stem
         result_line = f"{distances[0]}\t{distances[1]}\t{distances[2]}\t{distances[3]}\t{dangers[0]}\t{dangers[1]}\t{dangers[2]}\t{dangers[3]}\t{cell_counts[0]}\t{cell_counts[1]}\t{cell_counts[2]}\t{cell_counts[3]}\t{times[0]}\t{times[1]}\t{times[2]}\t{times[3]}\t\"{maze_name}\""
         results.append(result_line)

@@ -1563,8 +1563,55 @@ static void run_back_to_start(enum speed_strategy speed) {
 #endif
 
 #ifdef MMSIM_ENABLED
+static float mmsim_get_estimated_time(void) {
+  float time = 0;
+  uint16_t move_count = 0;
+
+  uint8_t index = 0;
+  enum movement last_movement = MOVE_START;
+
+  while (run_sequence_movements[index] != MOVE_HOME) {
+    enum movement current_movement = run_sequence_movements[index];
+
+    if (current_movement == last_movement && move_count + 1 < straight_weights_count) {
+      move_count++;
+    }
+
+    switch (current_movement) {
+      case MOVE_START:
+        time += straight_weights[move_count].time;
+        break;
+      case MOVE_FRONT:
+      case MOVE_DIAGONAL:
+        if (current_movement != last_movement) {
+          time += diagonal_weights[move_count].penalty;
+        }
+        time += straight_weights[move_count].time;
+        break;
+      default:
+        if (current_movement != last_movement) {
+          time += straight_weights[move_count].penalty;
+        }
+        time += diagonal_weights[move_count].time;
+        break;
+    }
+
+    if (current_movement != last_movement) {
+      move_count = 0;
+      last_movement = current_movement;
+    }
+
+    index++;
+  }
+
+  time += straight_weights[move_count].time;
+
+  return time;
+}
+
 static void mmsim_finish_explore(void) {
   floodfill_maze_print();
+  API_setTime(mmsim_get_estimated_time());
 }
 #endif
 
