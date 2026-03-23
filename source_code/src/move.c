@@ -1882,7 +1882,9 @@ void move_run_sequence(enum movement *sequence_movements) {
         } else {
           current_cell_start_mm = distance;
         }
-        move(MOVE_HOME);
+        if (!is_motor_saturated()) {
+          move(MOVE_HOME);
+        }
         break;
       case MOVE_LEFT:
       case MOVE_RIGHT:
