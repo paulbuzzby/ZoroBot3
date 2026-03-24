@@ -98,7 +98,11 @@ static void debug_timetrial_demo(void) {
   set_RGB_color(0, 0, 0);
   debug_enabled = false;
   set_race_started(true);
-  set_target_fan_speed(get_kinematics().fan_speed, 1000);
+  if (is_battery_2s()) {
+    set_target_fan_speed(get_kinematics().fan_speed_2s, 1000);
+  } else {
+    set_target_fan_speed(get_kinematics().fan_speed_3s, 1000);
+  }
   delay(1500);
 
   run_straight(CELL_DIMENSION * 2 - (ROBOT_BACK_LENGTH + WALL_WIDTH / 2.0f),
@@ -147,7 +151,11 @@ static void debug_keep_front_distance_demo(void) {
   set_race_started(true);
   set_sensors_enabled(true);
   set_RGB_color(0, 50, 0);
-  set_target_fan_speed(get_kinematics().fan_speed, 1000);
+  if (is_battery_2s()) {
+    set_target_fan_speed(get_kinematics().fan_speed_2s, 1000);
+  } else {
+    set_target_fan_speed(get_kinematics().fan_speed_3s, 1000);
+  }
   delay(1200);
   do {
     if (get_clock_ticks() >= last_keep_front_distance + 1) {
@@ -182,7 +190,11 @@ static void debug_keep_front_distance_demo(void) {
 static void debug_gyro_demo(void) {
   reset_control_all();
   delay(1000);
-  set_fan_speed(35);
+  if (is_battery_2s()) {
+    set_fan_speed(35);
+  } else {
+    set_fan_speed(23);
+  }
   do {
     if (get_clock_ticks() >= last_keep_z_angle + 1) {
       keep_z_angle();
@@ -197,7 +209,11 @@ static void debug_gyro_demo(void) {
 static void debug_fan_demo(void) {
   reset_control_all();
   delay(1000);
-  set_fan_speed(35);
+  if (is_battery_2s()) {
+    set_fan_speed(35);
+  } else {
+    set_fan_speed(23);
+  }
   do {
     check_debug_active();
   } while (debug_enabled);

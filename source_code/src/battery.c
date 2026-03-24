@@ -4,14 +4,15 @@ static float voltage_div_factor = VOLT_DIV_FACTOR_2S;
 static float battery_full_voltage = BATTERY_3S_LOW_LIMIT_VOLTAGE;
 static volatile float battery_voltage = 0;
 
+static bool battery_2s = true;
+
 void set_battery_volt_div_factor(uint16_t version) {
   switch (version) {
     case ZOROBOT3_A:
-
-      voltage_div_factor = VOLT_DIV_FACTOR_2S;
+      voltage_div_factor = 3.96;
       break;
     case ZOROBOT3_B:
-    voltage_div_factor = 3.99;
+      voltage_div_factor = 3.99;
       break;
     case ZOROBOT3_C:
       voltage_div_factor = VOLT_DIV_FACTOR_3S;
@@ -47,12 +48,18 @@ void show_battery_level(void) {
   if (voltage >= BATTERY_3S_LOW_LIMIT_VOLTAGE && voltage <= BATTERY_3S_HIGH_LIMIT_VOLTAGE) {
     battery_full_voltage = BATTERY_3S_HIGH_LIMIT_VOLTAGE;
     battery_level = map(voltage, BATTERY_3S_LOW_LIMIT_VOLTAGE, BATTERY_3S_HIGH_LIMIT_VOLTAGE, 0.0f, 100.0f);
+    battery_2s = false;
   } else if (voltage >= BATTERY_2S_LOW_LIMIT_VOLTAGE /*  && voltage <= BATTERY_2S_HIGH_LIMIT_VOLTAGE */) {
     battery_full_voltage = BATTERY_2S_HIGH_LIMIT_VOLTAGE;
     battery_level = map(voltage, BATTERY_2S_LOW_LIMIT_VOLTAGE, BATTERY_2S_HIGH_LIMIT_VOLTAGE, 0.0f, 100.0f);
+    battery_2s = true;
   }
   while (get_clock_ticks() < ticksInicio + 750) {
     set_leds_battery_level(battery_level);
   }
   all_leds_clear();
+}
+
+bool is_battery_2s() {
+  return battery_2s;
 }

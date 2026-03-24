@@ -93,7 +93,8 @@ struct linear_accel_params {
 struct kinematics {
   int16_t linear_speed;
   struct linear_accel_params linear_accel;
-  int16_t fan_speed;
+  int16_t fan_speed_2s;
+  int16_t fan_speed_3s;
   struct turn_params *turns;
   struct kpi_params *kpi;
   struct mpu_params mpu;

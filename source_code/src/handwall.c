@@ -21,7 +21,11 @@ void handwall_start(void) {
   configure_kinematics(menu_run_get_speed());
   clear_info_leds();
   set_RGB_color(0, 0, 0);
-  set_target_fan_speed(get_kinematics().fan_speed, 400);
+  if (is_battery_2s()) {
+    set_target_fan_speed(get_kinematics().fan_speed_2s, 400);
+  } else {
+    set_target_fan_speed(get_kinematics().fan_speed_3s, 400);
+  }
   delay(500);
   move(MOVE_START);
 }

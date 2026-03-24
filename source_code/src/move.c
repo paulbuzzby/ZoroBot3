@@ -811,7 +811,8 @@ static struct kinematics kinematics_settings[] = {
             .speed_hard = 0,
             .accel_soft = 0,
         },
-        .fan_speed = 40,
+        .fan_speed_2s = 35,
+        .fan_speed_3s = 20,
         .turns = turns_explore,
         .kpi = kpi_explore,
         .mpu = {
@@ -827,7 +828,8 @@ static struct kinematics kinematics_settings[] = {
             .speed_hard = 0,
             .accel_soft = 0,
         },
-        .fan_speed = 60,
+        .fan_speed_2s = 60,
+        .fan_speed_3s = 40,
         .turns = turns_normal,
         .kpi = kpi_run,
         .mpu = {
@@ -843,7 +845,8 @@ static struct kinematics kinematics_settings[] = {
             .speed_hard = 0,
             .accel_soft = 0,
         },
-        .fan_speed = 65,
+        .fan_speed_2s = 65,
+        .fan_speed_3s = 44,
         .turns = turns_medium,
         .kpi = kpi_run,
         .mpu = {
@@ -859,7 +862,8 @@ static struct kinematics kinematics_settings[] = {
             .speed_hard = 3500,
             .accel_soft = 15000,
         },
-        .fan_speed = 70,
+        .fan_speed_2s = 70,
+        .fan_speed_3s = 47,
         .turns = turns_fast,
         .kpi = kpi_run,
         .mpu = {
@@ -875,7 +879,8 @@ static struct kinematics kinematics_settings[] = {
             .speed_hard = 4000,
             .accel_soft = 20000,
         },
-        .fan_speed = 85,
+        .fan_speed_2s = 85,
+        .fan_speed_3s = 57,
         .turns = turns_super,
         .kpi = kpi_run,
         .mpu = {
@@ -891,7 +896,8 @@ static struct kinematics kinematics_settings[] = {
             .speed_hard = 4500,
             .accel_soft = 25000,
         },
-        .fan_speed = 90,
+        .fan_speed_2s = 90,
+        .fan_speed_3s = 60,
         .turns = turns_haki,
         .kpi = kpi_run,
         .mpu = {

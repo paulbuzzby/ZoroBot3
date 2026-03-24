@@ -1546,7 +1546,11 @@ static void run_back_to_start(enum speed_strategy speed) {
   smooth_run_sequence(speed);
 
   set_race_started(true);
-  set_target_fan_speed(get_kinematics().fan_speed, 1000);
+  if (is_battery_2s()) {
+    set_target_fan_speed(get_kinematics().fan_speed_2s, 1000);
+  } else {
+    set_target_fan_speed(get_kinematics().fan_speed_3s, 1000);
+  }
   delay(1500);
   set_RGB_color(0, 0, 0);
   move_run_sequence(run_sequence_movements);
@@ -1881,7 +1885,11 @@ void floodfill_start_explore(void) {
   delay(125);
   side_sensors_calibration(true);
   delay(125);
-  set_target_fan_speed(get_kinematics().fan_speed, 400);
+  if (is_battery_2s()) {
+    set_target_fan_speed(get_kinematics().fan_speed_2s, 400);
+  } else {
+    set_target_fan_speed(get_kinematics().fan_speed_3s, 400);
+  }
   start_ms = get_clock_ticks();
   delay(800);
 #endif
@@ -1935,7 +1943,11 @@ void floodfill_start_run(void) {
   if (!is_race_auto_run()) {
     side_sensors_calibration(true);
   }
-  set_target_fan_speed(get_kinematics().fan_speed, 1000);
+  if (is_battery_2s()) {
+    set_target_fan_speed(get_kinematics().fan_speed_2s, 1000);
+  } else {
+    set_target_fan_speed(get_kinematics().fan_speed_3s, 1000);
+  }
   delay(1300);
 #endif
 }

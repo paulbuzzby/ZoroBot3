@@ -18,5 +18,6 @@ void update_battery_voltage(void);
 float get_battery_voltage(void);
 float get_battery_high_limit_voltage(void);
 void show_battery_level(void);
+bool is_battery_2s(void);
 
 #endif /* __BATTERY_H */
